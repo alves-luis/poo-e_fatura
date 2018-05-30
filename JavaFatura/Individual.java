@@ -3,21 +3,24 @@
  * Class that represents an Individual in the system
  *
  * @author Zé, Luís e Miguel
- * @version 1.1
+ * @version 1.7
  */
 
 import java.util.Map;
 import java.util.HashMap;
 import java.util.Set;
 import java.util.HashSet;
+import java.util.TreeSet;
 import java.util.stream.Collectors;
+import java.util.Objects;
 
 public class Individual extends User {
-    // instance variables
+    /** Maps the NIFs to the actual family member */
     private Map<Integer,Individual> family;
+    /** Special fiscalCoefficient */
     private double fiscalCoefficient;
-    private Set<EconomicalFields> whereCanDeduct;
-    private IndividualDatabase invoices;
+    /** Set of EconomicalFields an Individual can deduct to */
+    private Set<EconomicalField> whereCanDeduct;
 
     /**
     * Empty Constructor
@@ -26,8 +29,7 @@ public class Individual extends User {
         super();
         this.family = new HashMap<Integer,Individual>();
         this.fiscalCoefficient = 1;
-        this.whereCanDeduct = new HashSet<EconomicalFields>();
-        this.invoices = new IndividualDatabase();
+        this.whereCanDeduct = new TreeSet<EconomicalField>();
     }
 
     /**
@@ -35,19 +37,18 @@ public class Individual extends User {
      */
     public Individual(int myNIF, String myEmail, String myName, String myAddress, String myPassword,
                       Set<Individual> myFamily, double myFiscalCoefficient,
-                      Set<EconomicalFields> whereICanDeduct) {
-
+                      Set<EconomicalField> whereICanDeduct) {
       super(myNIF,myEmail,myName,myAddress,myPassword);
       this.family = myFamily.stream().collect(Collectors.toMap(Individual :: getNIF, Individual :: clone));
       this.fiscalCoefficient = myFiscalCoefficient;
-      this.whereCanDeduct = whereICanDeduct.stream().map(EconomicalFields :: clone).collect(Collectors.toCollection(HashSet::new));
+      this.whereCanDeduct = whereICanDeduct.stream().map(EconomicalField :: clone).collect(Collectors.toCollection(TreeSet::new));
     }
 
     public Individual(int myNif, String myEmail, String myName, String myAddress, String myPassword) {
       super(myNif,myEmail,myName,myAddress,myPassword);
       this.family = new HashMap<>();
       this.fiscalCoefficient = 1;
-      this.whereCanDeduct = new HashSet<EconomicalFields>();
+      this.whereCanDeduct = new TreeSet<EconomicalField>();
     }
 
     /**
@@ -60,39 +61,34 @@ public class Individual extends User {
         this.whereCanDeduct = i.getWhereCanDeduct();
     }
 
-    // vai à base de dados de cada Individuo em family e soma o total de dedução
-    // em cada economicalfield
-    public double getTotalFiscalDeductionFromFamily() {
-      return 0;
-    }
-
-    public void addFamilyMember(Individual newFamilymember) {
-
-    }
-
-    public void removeFamilyMember(int nifOfFamilyMember) {
-
-    }
-
     /**
-      * For each EconomicalField in whereCanDeduct, checks database
-      * for invoices of that economicalfield and multiplies the sum of them
-      * by the deduction from that EconomicalField.
+      * Adds a new family member to the Individual
+      * @param newFamilymember Individual that will now be part of the family
     */
-    public Map<EconomicalFields,Double> getFiscalDeductionPerEconomicalField() {
-      return null;
-    }
-
-    public double getFiscalDeductionFromEconomicalField(EconomicalFields e) {
-      return e.getDeductionValue();
-    }
-
-    public Set<EconomicalFields> getWhereCanDeduct() {
-      return this.whereCanDeduct.stream().map(EconomicalFields :: clone).collect(Collectors.toSet());
+    public void addFamilyMember(Individual newFamilymember) {
+       this.family.put(newFamilymember.getNIF(),newFamilymember.clone());
     }
 
     /**
-      * Getter for the Family of an individual
+      * Returns a set of EconomicalFields where the Individual can have
+      * fiscal deductions
+      * @return Set<EconomicalField>
+    */
+    public Set<EconomicalField> getWhereCanDeduct() {
+      return this.whereCanDeduct.stream().map(EconomicalField :: clone).collect(Collectors.toCollection(TreeSet::new));
+    }
+
+    /**
+      * Set where can deduct
+      * @param eco EconomicalField to add to be able to deduct
+    */
+    public void addWhereCanDeduct(EconomicalField eco) {
+      this.whereCanDeduct.add(eco.clone());
+    }
+
+    /**
+      * Returns a set of Individuals that are part of the family
+      * @return Set<Individual>
     */
     public Set<Individual> getFamily() {
       return this.family.values().stream().map(Individual :: clone).collect(Collectors.toSet());
@@ -117,37 +113,24 @@ public class Individual extends User {
     }
 
 
+    /**
+      * Setter for the fiscal Coefficient
+      * @param newFiscalCoefficient
+    */
     public void setFiscalCoefficient(double newFiscalCoefficient) {
         this.fiscalCoefficient = newFiscalCoefficient;
     }
 
-    public void addInvoice(Invoice i) {
-      this.invoices.addInvoice(i);
-    }
-    
-    // Returns the sum of all the expenseValueAfterTax of his invoices
-    public double getTotalSpent() {
-        return 0;
-    }
-
-
     /**
      * Equals method
      *
-     * @param  maybeIndividual  Object to be compared
+     * @param  obj Object to be compared
      *
      * @return    Whether it is equal or not
      */
-    public boolean equals (Object maybeIndividual) {
-        if (this == maybeIndividual)
-            return true;
-
-        if (this == null || maybeIndividual.getClass() != this.getClass())
-            return false;
-
-        Individual individual = (Individual) maybeIndividual;
-        return super.equals(maybeIndividual);
-    }
+     public boolean equals(Object obj) {
+         return super.equals(obj);
+     }
 
     /**
      * Clone method
@@ -158,6 +141,10 @@ public class Individual extends User {
         return new Individual(this);
     }
 
+    /**
+      * ToString
+      * @return String all pretty
+    */
     public String toString() {
         StringBuilder str = new StringBuilder();
 
@@ -172,9 +159,17 @@ public class Individual extends User {
         str.append(" \n");
 
         str.append("Fiscal Coefficient: ");
-        str.append(this.fiscalCoefficient);
+        str.append(this.getFiscalCoefficient());
         str.append(" \n");
 
+        str.append("Where can deduct: ");
+        str.append(this.whereCanDeduct.toString());
+        str.append("\n");
+
         return str.toString();
+    }
+
+    public int hashCode() {
+      return super.hashCode();
     }
 }

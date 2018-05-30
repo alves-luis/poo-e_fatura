@@ -6,8 +6,11 @@
  * @version 1.1
  */
 
+import java.io.Serializable;
+import java.util.Objects;
 
-public class User {
+
+public class User implements Serializable {
 
     private int NIF;
     private String email;
@@ -25,6 +28,14 @@ public class User {
         this.name = "";
         this.address = "";
         this.password = "";
+    }
+
+    /**
+      * Constructor that accepts a NIF
+      * @param nif User NIF
+    */
+    public User(int nif) {
+      this.NIF = nif;
     }
 
     /**
@@ -140,6 +151,13 @@ public class User {
     }
 
     /**
+      * Better way to login.
+    */
+    public boolean userMatch(int nif, String pass) {
+      return (this.NIF == nif) && (this.password.equals(pass));
+    }
+
+    /**
      * Equals method
      *
      * @param  maybeUser  Object to be compared
@@ -166,6 +184,10 @@ public class User {
         return new User(this);
     }
 
+    /**
+      * to String
+      * @return String all pretty
+    */
     public String toString() {
         StringBuilder str = new StringBuilder();
 
@@ -185,10 +207,11 @@ public class User {
         str.append(this.address);
         str.append(" \n");
 
-        str.append("Password: ");
-        str.append(this.password);
-        str.append(" \n");
 
         return str.toString();
+    }
+
+    public int hashCode() {
+      return 31*this.NIF + 19*this.name.hashCode()*3*this.address.hashCode() + this.email.hashCode()*7;
     }
 }
