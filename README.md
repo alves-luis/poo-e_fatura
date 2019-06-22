@@ -1,4 +1,4 @@
-# POO - E-Fatura
+# POO - eFatura
 This repo contains code made for the practical assignment of the Object Oriented Programming course in the University of Minho.
 
 Team members:
