@@ -1,5 +1,10 @@
-# POO_Project
+# POO - E-Fatura
+This repo contains code made for the practical assignment of the Object Oriented Programming course in the University of Minho.
 
-Hello. This is very bad. The performance is terrible. It sucks. It will not suck if I actually fix it sometime in the future. It probably won't happen soon. Enjoy it until then.
+Team members:
+* [Luís Alves](https://github.com/alves-luis)
+* [Miguel Carvalho](https://github.com/MAACarvalho)
+* [José Costa](https://github.com/DeusTaNoComando)
+* [João Queirós](https://github.com/JoaoQueiros)
 
-Made for *OOP*. Nestor <3
+Final grade: 19
